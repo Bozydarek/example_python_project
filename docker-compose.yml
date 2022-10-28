@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  postgres_db:
+    image: postgres
+    environment:
+      POSTGRES_DB: example
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+
+  mongo_db:
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: pass
+
+  # Container with web application
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: web_app
+    # Main process in container
+    command: python3 src/main.py
+    # docker volumes - Host:Container
+    volumes:
+      - ./src:/code/src
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres_db
+      - mongo_db
+    links:
+      - postgres_db
+      - mongo_db
+    # Environment configuration
+    environment:
+      POSTGRES_DB: example
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: pass
