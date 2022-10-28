@@ -1,9 +1,15 @@
 import os
+import random
+import time
+
 import psycopg2
 import pymongo
 
 
 def main() -> None:
+    # Hotfix: Wait for postgres to boot up
+    time.sleep(10)
+
     # Example configuration for Postgres DB
     pg_conn = psycopg2.connect(
         dbname=os.environ.get('POSTGRES_DB', 'default'),
@@ -14,10 +20,10 @@ def main() -> None:
     )
 
     # Some connection to Postgres
-    # Example from https://www.psycopg.org/docs/usage.html
+    # Based on example from https://www.psycopg.org/docs/usage.html
     cur = pg_conn.cursor()
-    cur.execute("CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar);")
-    cur.execute("INSERT INTO test (num, data) VALUES (%s, %s)", (100, "abc'def"))
+    cur.execute("CREATE TABLE IF NOT EXISTS test (id serial PRIMARY KEY, num integer, data varchar);")
+    cur.execute("INSERT INTO test (num, data) VALUES (%s, %s)", (random.randint(1, 100), "abc'def"))
     cur.execute("SELECT * FROM test;")
     data = cur.fetchall()
     pg_conn.commit()
